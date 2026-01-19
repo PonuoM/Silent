@@ -31,6 +31,10 @@ export interface Note {
   status: NoteStatus;
   linkedNoteIds: string[];      // M:N: IDs of linked notes (problems ↔ solutions)
   mergedFromIds: string[];      // IDs of notes that were merged into this one
+  // Creator tracking (stored but not displayed on UI)
+  createdByUserId?: string;     // User ID who created this note
+  createdByPhone?: string;      // User phone number (for reference)
+  createdByName?: string;       // User name (for reference)
 }
 
 export interface Metric {

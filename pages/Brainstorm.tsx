@@ -65,6 +65,10 @@ const Brainstorm: React.FC = () => {
       status: NoteStatus.Active,
       linkedNoteIds: [],
       mergedFromIds: [],
+      // Store creator info (hidden from UI)
+      createdByUserId: currentUser?.id,
+      createdByName: currentUser?.name,
+      createdByPhone: currentUser?.phone,
     };
 
     addNote(newNote);
@@ -212,11 +216,14 @@ const Brainstorm: React.FC = () => {
             ))}
           </div>
         )}
+
+        {/* Spacer for fixed input form on mobile */}
+        <div className="h-32 lg:h-0 shrink-0"></div>
       </div>
 
-      {/* Input Form - Mobile Optimized */}
+      {/* Input Form - Fixed at bottom on mobile */}
       {brainstormSession.isActive ? (
-        <div className="bg-white border-t border-slate-200 p-3 lg:p-4 z-30">
+        <div className="fixed bottom-0 left-0 right-0 lg:relative bg-white border-t border-slate-200 p-3 lg:p-4 z-40 shadow-[0_-4px_12px_rgba(0,0,0,0.1)] lg:shadow-none">
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-2 lg:space-y-0 lg:flex lg:gap-3">
             {/* Category Pills */}
             <div className="flex gap-1 overflow-x-auto pb-1">
@@ -257,7 +264,7 @@ const Brainstorm: React.FC = () => {
           </form>
         </div>
       ) : (
-        <div className="bg-slate-100 border-t border-slate-200 p-4 z-30">
+        <div className="fixed bottom-0 left-0 right-0 lg:relative bg-slate-100 border-t border-slate-200 p-4 z-40">
           <div className="max-w-3xl mx-auto text-center text-slate-500">
             <span className="material-symbols-outlined text-2xl">lock</span>
             <p className="text-sm font-medium">เซสชันยังไม่เริ่ม - รอผู้ดูแลกดเริ่มระดมสมอง</p>

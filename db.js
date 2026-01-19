@@ -40,6 +40,8 @@ export async function initDatabase() {
                 linked_note_ids TEXT DEFAULT '[]',
                 merged_from_ids TEXT DEFAULT '[]',
                 user_id TEXT,
+                user_name TEXT,
+                user_phone TEXT,
                 session_id TEXT DEFAULT 'default',
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
@@ -63,6 +65,20 @@ export async function initDatabase() {
                   VALUES (?, ?, ?, ?, ?, ?)`,
             args: ['default', 'Default Session', 'เซสชั่นเริ่มต้น', Date.now(), 1, 'system']
         });
+
+        // Migrate existing tables: add user_name and user_phone columns if they don't exist
+        try {
+            await db.execute(`ALTER TABLE notes ADD COLUMN user_name TEXT`);
+            console.log('📦 Added user_name column to notes table');
+        } catch (e) {
+            // Column already exists, ignore
+        }
+        try {
+            await db.execute(`ALTER TABLE notes ADD COLUMN user_phone TEXT`);
+            console.log('📦 Added user_phone column to notes table');
+        } catch (e) {
+            // Column already exists, ignore
+        }
 
         console.log('✅ Turso Database connected and initialized');
     } catch (error) {
@@ -369,18 +385,21 @@ export async function getSessionStats(sessionId) {
 export async function addNoteWithSession(note, sessionId) {
     try {
         await db.execute({
-            sql: `INSERT INTO notes (id, content, author, avatar_url, category, type, quadrant, status, timestamp, likes, linked_note_ids, merged_from_ids, session_id)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            sql: `INSERT INTO notes (id, content, author, avatar_url, category, type, quadrant, status, timestamp, likes, linked_note_ids, merged_from_ids, user_id, user_name, user_phone, session_id)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             args: [
                 note.id, note.content, note.author, note.avatarUrl || null,
                 note.category, note.type, note.quadrant, note.status || 'ACTIVE',
                 note.timestamp, note.likes || 0,
                 JSON.stringify(note.linkedNoteIds || []),
                 JSON.stringify(note.mergedFromIds || []),
+                note.createdByUserId || null,
+                note.createdByName || null,
+                note.createdByPhone || null,
                 sessionId || 'default'
             ]
         });
-        console.log(`📝 Note added to session ${sessionId}: ${note.id}`);
+        console.log(`📝 Note added to session ${sessionId}: ${note.id} (by ${note.createdByName || 'anonymous'})`);
         return true;
     } catch (error) {
         console.error('❌ Add note with session error:', error);
