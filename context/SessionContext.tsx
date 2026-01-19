@@ -3,8 +3,8 @@ import { io, Socket } from 'socket.io-client';
 import { Note, NoteType, Quadrant, NoteStatus } from '../types';
 import { INITIAL_NOTES } from '../constants';
 
-// Socket.IO URL - For local dev use localhost:3001, for production use the deployed URL
-const SOCKET_URL = 'http://localhost:3001';
+// Socket.IO URL - Uses env variable or falls back to current origin (for production on same server)
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || window.location.origin;
 
 // User type with status and role
 export interface User {

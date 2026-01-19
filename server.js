@@ -19,6 +19,9 @@ app.use(cors());
 // Serve static files from 'assets' directory
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
+// Serve static files from 'dist' directory (production build)
+app.use(express.static(path.join(__dirname, 'dist')));
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -312,7 +315,7 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Initialize database and start server
 async function start() {
@@ -334,7 +337,7 @@ async function start() {
 // This allows React Router to handle routing on the client side
 // Express 5 requires named parameter for wildcard routes
 app.get('/{*splat}', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 start();
