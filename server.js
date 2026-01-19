@@ -21,9 +21,8 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  path: '/silent-api/socket.io',
   cors: {
-    origin: ["https://app.prima49.com", "https://silent-brainstorm.prima49.com", "http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173", "http://localhost:3000"],
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });

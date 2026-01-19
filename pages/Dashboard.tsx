@@ -9,7 +9,8 @@ const Dashboard: React.FC = () => {
     notes,
     getSessionStats,
     currentSessionId,
-    sessions
+    sessions,
+    isConnected  // Add this to check connection status
   } = useSession();
 
   const [stats, setStats] = useState<SessionStats | null>(null);
@@ -20,18 +21,33 @@ const Dashboard: React.FC = () => {
   // Calculate stats from notes (real data)
   useEffect(() => {
     const loadStats = async () => {
-      setLoading(true);
+      // Only try to load stats if connected and have the socket ready
+      if (!isConnected) {
+        // Not connected yet, use local fallback
+        setLoading(false);
+        return;
+      }
+
       try {
-        const sessionStats = await getSessionStats();
+        // Add timeout to prevent infinite wait
+        const timeoutPromise = new Promise<SessionStats>((_, reject) => {
+          setTimeout(() => reject(new Error('Stats timeout')), 3000);
+        });
+
+        const sessionStats = await Promise.race([
+          getSessionStats(),
+          timeoutPromise
+        ]);
         setStats(sessionStats);
       } catch (error) {
         console.error('Failed to load stats:', error);
+        // On error, use local notes as fallback
       } finally {
         setLoading(false);
       }
     };
     loadStats();
-  }, [currentSessionId, notes]);
+  }, [currentSessionId, notes, isConnected]);
 
   // Calculate from local notes as fallback
   const problems = notes.filter(n => n.type === NoteType.Problem && n.status !== NoteStatus.Merged);

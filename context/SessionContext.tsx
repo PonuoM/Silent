@@ -3,8 +3,8 @@ import { io, Socket } from 'socket.io-client';
 import { Note, NoteType, Quadrant, NoteStatus } from '../types';
 import { INITIAL_NOTES } from '../constants';
 
-// Production: use same origin, Dev: use localhost:3001
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || (import.meta.env.DEV ? 'http://localhost:3001' : window.location.origin);
+// Socket.IO URL - For local dev use localhost:3001, for production use the deployed URL
+const SOCKET_URL = 'http://localhost:3001';
 
 // User type with status and role
 export interface User {
@@ -113,14 +113,19 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     // Prevent multiple connections
     if (socketRef.current) return;
 
+    console.log('🔌 Attempting to connect to Socket.IO server at:', SOCKET_URL);
+
     // Use specific URL for production or localhost for dev
     // Important: For sub-folder deployment, we need to specify the path
-    // NOTE: Using polling only because Phusion Passenger doesn't support WebSocket
+    // NOTE: Using polling for initial connection for reliability
     const socket = io(SOCKET_URL, {
-      path: import.meta.env.DEV ? '/socket.io' : '/silent-api/socket.io',
-      transports: ['polling'],  // Polling only - no WebSocket on shared hosting
+      transports: ['polling', 'websocket'],  // Polling first for reliability, websocket as upgrade
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      timeout: 10000,
+      forceNew: true,  // Force a new connection
+      autoConnect: true,
+      withCredentials: false,  // Don't send credentials for cross-origin
     });
 
     socketRef.current = socket;
@@ -149,6 +154,11 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
           }
         });
       }
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error('❌ Socket.IO connection error:', error.message);
+      setIsConnected(false);
     });
 
     socketRef.current.on('disconnect', () => {
