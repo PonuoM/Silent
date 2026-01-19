@@ -333,7 +333,8 @@ async function start() {
 
 // SPA Fallback: Serve index.html for any other requests
 // This allows React Router to handle routing on the client side
-app.get('*', (req, res) => {
+// Express 5 requires named parameter for wildcard routes
+app.get('/{*splat}', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
