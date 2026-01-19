@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "mysql2": "^3.14.1",
+    "@libsql/client": "^0.14.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
