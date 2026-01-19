@@ -66,7 +66,13 @@ export async function initDatabase() {
             args: ['default', 'Default Session', 'เซสชั่นเริ่มต้น', Date.now(), 1, 'system']
         });
 
-        // Migrate existing tables: add user_name and user_phone columns if they don't exist
+        // Migrate existing tables: add user columns if they don't exist
+        try {
+            await db.execute(`ALTER TABLE notes ADD COLUMN user_id TEXT`);
+            console.log('📦 Added user_id column to notes table');
+        } catch (e) {
+            // Column already exists, ignore
+        }
         try {
             await db.execute(`ALTER TABLE notes ADD COLUMN user_name TEXT`);
             console.log('📦 Added user_name column to notes table');
