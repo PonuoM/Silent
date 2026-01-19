@@ -130,15 +130,17 @@ const Sidebar: React.FC = () => {
             ))}
           </nav>
 
-          {/* Session Selector */}
-          {!sidebarCollapsed && (
+          {/* Session Selector - Admin Only */}
+          {currentUser?.role === 'ADMIN' && !sidebarCollapsed && (
             <div className="mt-6 hidden lg:block">
               <SessionSelector />
             </div>
           )}
-          <div className="mt-6 lg:hidden">
-            <SessionSelector />
-          </div>
+          {currentUser?.role === 'ADMIN' && (
+            <div className="mt-6 lg:hidden">
+              <SessionSelector />
+            </div>
+          )}
         </div>
 
         {/* User section */}
